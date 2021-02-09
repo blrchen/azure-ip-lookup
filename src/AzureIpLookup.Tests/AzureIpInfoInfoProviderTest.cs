@@ -1,108 +1,51 @@
-using System.Net.Http;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using AzureIpLookup.DataContracts;
 using AzureIpLookup.Providers;
-using Microsoft.Extensions.Logging;
+using AzureIpLookup.Tests.Common;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace AzureIpLookup.Tests
 {
     [TestClass]
     public class AzureIpInfoInfoProviderTest
     {
-        private readonly Mock<IHttpClientFactory> mockHttpClientFactory;
-        private readonly Mock<ILogger<AzureIpInfoProvider>> mockLogger;
+        private readonly Mock<IAzureStorageProvider> mockAzureStorageProvider;
+        private readonly IAzureIpInfoProvider azureIpInfoProvider;
 
         public AzureIpInfoInfoProviderTest()
         {
-            this.mockHttpClientFactory = new Mock<IHttpClientFactory>();
-            var httpClient = new HttpClient();
-            this.mockHttpClientFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
-            this.mockLogger = new Mock<ILogger<AzureIpInfoProvider>>();
+            mockAzureStorageProvider = new Mock<IAzureStorageProvider>(MockBehavior.Strict);
+            var mockLogger = new MockLogger<AzureIpInfoProvider>();
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            azureIpInfoProvider = new AzureIpInfoProvider(mockAzureStorageProvider.Object, mockLogger, memoryCache);
+            SetupMock();
         }
 
         [TestMethod]
-        public async Task TestLookupPublicAzureIpByDomain()
+        public async Task TestGetAzureIpInfo()
         {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("portal-prod-southeastasia-02.southeastasia.cloudapp.azure.com");
-            Assert.AreEqual("AzureCloud.southeastasia", result.ServiceTagId);
-            Assert.AreEqual("52.139.236.115", result.IpAddress);
-            Assert.AreEqual("52.139.192.0/18", result.IpAddressPrefix);
-            Assert.AreEqual("southeastasia", result.Region);
-            Assert.AreEqual("", result.SystemService);
+            await azureIpInfoProvider.GetAzureIpInfo("1.1.1.1");
+            mockAzureStorageProvider.Verify(p => p.GetAzureIpInfoListAsync(), Times.Once);
         }
 
         [TestMethod]
-        public async Task TestLookupPublicAzureIpByIpAddress()
+        public async Task TestGetAzureIpInfo_ReadFromCacheIfNoExpired()
         {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("52.139.236.115");
-            Assert.AreEqual("AzureCloud.southeastasia", result.ServiceTagId);
-            Assert.AreEqual("52.139.236.115", result.IpAddress);
-            Assert.AreEqual("52.139.192.0/18", result.IpAddressPrefix);
-            Assert.AreEqual("southeastasia", result.Region);
-            Assert.AreEqual("", result.SystemService);
+            await azureIpInfoProvider.GetAzureIpInfo("1.1.1.1");
+            await azureIpInfoProvider.GetAzureIpInfo("1.1.1.1");
+            mockAzureStorageProvider.Verify(p => p.GetAzureIpInfoListAsync(), Times.Once);
         }
 
-        [TestMethod]
-        public async Task TestLookupAzureChinaCloudIpByDomain()
+        private void SetupMock()
         {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("portal-mc-chinaeast2-02.chinaeast2.cloudapp.chinacloudapi.cn");
-            Assert.AreEqual("AzureCloud.chinaeast2", result.ServiceTagId);
-            Assert.AreEqual("40.73.108.25", result.IpAddress);
-            Assert.AreEqual("40.73.64.0/18", result.IpAddressPrefix);
-            Assert.AreEqual("chinaeast2", result.Region);
-            Assert.AreEqual("", result.SystemService);
-        }
-
-        [TestMethod]
-        public async Task TestLookupAzureChinaCloudIpByIpAddress()
-        {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("40.73.108.25");
-            Assert.AreEqual("AzureCloud.chinaeast2", result.ServiceTagId);
-            Assert.AreEqual("40.73.108.25", result.IpAddress);
-            Assert.AreEqual("40.73.64.0/18", result.IpAddressPrefix);
-            Assert.AreEqual("chinaeast2", result.Region);
-            Assert.AreEqual("", result.SystemService);
-        }
-
-        [TestMethod]
-        public async Task TestLookupAzureUSGovernmentIpByDomain()
-        {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("portal-ff-usgovtexas-02.usgovtexas.cloudapp.usgovcloudapi.net");
-            Assert.AreEqual("AzurePortal.USGovTexas", result.ServiceTagId);
-            Assert.AreEqual("20.140.57.97", result.IpAddress);
-            Assert.AreEqual("20.140.57.96/29", result.IpAddressPrefix);
-            Assert.AreEqual("usgovtexas", result.Region);
-            Assert.AreEqual("AzurePortal", result.SystemService);
-        }
-
-        [TestMethod]
-        public async Task TestLookupAzureUSGovernmentIpByIpAddress()
-        {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("20.140.57.97");
-            Assert.AreEqual("AzurePortal.USGovTexas", result.ServiceTagId);
-            Assert.AreEqual("20.140.57.97", result.IpAddress);
-            Assert.AreEqual("20.140.57.96/29", result.IpAddressPrefix);
-            Assert.AreEqual("usgovtexas", result.Region);
-            Assert.AreEqual("AzurePortal", result.SystemService);
-        }
-
-        [TestMethod]
-        public async Task TestLookupInvalidIpAddress()
-        {
-            var provider = new AzureIpInfoProvider(mockHttpClientFactory.Object, mockLogger.Object);
-            var result = await provider.GetAzureIpInfo("1.1.1.1");
-            Assert.AreEqual(null, result.ServiceTagId);
-            Assert.AreEqual(null, result.IpAddress);
-            Assert.AreEqual(null, result.IpAddressPrefix);
-            Assert.AreEqual(null, result.Region);
-            Assert.AreEqual(null, result.SystemService);
+            var azureIpInfoListFileContent = File.ReadAllText(@"Data\azureIpInfoList.json");
+            var azureIpInfoList = JsonConvert.DeserializeObject<IList<AzureIpInfo>>(azureIpInfoListFileContent);
+            mockAzureStorageProvider.Setup(provider => provider.GetAzureIpInfoListAsync()).ReturnsAsync(azureIpInfoList);
         }
     }
 }

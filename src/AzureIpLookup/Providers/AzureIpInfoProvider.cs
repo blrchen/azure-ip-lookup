@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AzureIpLookup.Common;
 using AzureIpLookup.DataContracts;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -12,13 +12,20 @@ namespace AzureIpLookup.Providers
 {
     public class AzureIpInfoProvider : IAzureIpInfoProvider
     {
-        private readonly IHttpClientFactory httpClientFactory;
+        private const string AzureIpInfoListKey = "AzureIpInfoList";
+        private const double CacheAbsoluteExpirationInMinutes = 60;
+        private readonly IAzureStorageProvider azureStorageProvider;
         private readonly ILogger<AzureIpInfoProvider> logger;
+        private readonly IMemoryCache memoryCache;
 
-        public AzureIpInfoProvider(IHttpClientFactory httpClientFactory, ILogger<AzureIpInfoProvider> logger)
+        public AzureIpInfoProvider(
+            IAzureStorageProvider azureStorageProvider,
+            ILogger<AzureIpInfoProvider> logger,
+            IMemoryCache memoryCache)
         {
-            this.httpClientFactory = httpClientFactory;
+            this.azureStorageProvider = azureStorageProvider;
             this.logger = logger;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<AzureIpInfo> GetAzureIpInfo(string ipOrDomain)
@@ -33,6 +40,7 @@ namespace AzureIpLookup.Providers
                 if (ipNetwork.Contains(IPAddress.Parse(ipAddress)))
                 {
                     ipInfo.IpAddress = ipAddress;
+                    logger.LogInformation($"GetAzureIpInfo ipOrDomain = {ipOrDomain}, result = {JsonConvert.SerializeObject(ipInfo)}");
                     return ipInfo;
                 }
             }
@@ -42,37 +50,13 @@ namespace AzureIpLookup.Providers
             return new AzureIpInfo();
         }
 
-        private async Task<List<AzureIpInfo>> GetAzureIpInfoList()
+        private async Task<IList<AzureIpInfo>> GetAzureIpInfoList()
         {
-            List<AzureIpInfo> azureIpInfoList = new List<AzureIpInfo>();
-            var clouds = Enum.GetValues(typeof(AzureCloudName));
-            foreach (var cloud in clouds)
+            if (!memoryCache.TryGetValue(AzureIpInfoListKey, out IList<AzureIpInfo> azureIpInfoList))
             {
-                string ipFileBlobUrl = $"https://azureiplookup.blob.core.windows.net/ipfiles/{cloud}.json";
-                logger.LogInformation($"Getting Azure ip info for {cloud} from {ipFileBlobUrl}");
-                string jsonResponseMessage = await this.httpClientFactory.CreateClient().GetStringAsync(ipFileBlobUrl);
-                var azureServiceTagsCollection = JsonConvert.DeserializeObject<AzureServiceTagsCollection>(jsonResponseMessage);
-
-                foreach (var azureServiceTag in azureServiceTagsCollection.AzureServiceTags)
-                {
-                    if (string.IsNullOrWhiteSpace(azureServiceTag.Properties.Region))
-                    {
-                        continue;
-                    }
-
-                    foreach (string addressPrefix in azureServiceTag.Properties.AddressPrefixes)
-                    {
-                        azureIpInfoList.Add(new AzureIpInfo
-                        {
-                            ServiceTagId = azureServiceTag.Id,
-                            Region = azureServiceTag.Properties.Region,
-
-                            // Platform = azureServiceTag.Properties.Platform, // Platform is always Azure
-                            SystemService = azureServiceTag.Properties.SystemService,
-                            IpAddressPrefix = addressPrefix
-                        });
-                    }
-                }
+                azureIpInfoList = await azureStorageProvider.GetAzureIpInfoListAsync();
+                memoryCache.Set(AzureIpInfoListKey, azureIpInfoList, TimeSpan.FromMinutes(60));
+                logger.LogInformation($"Added {azureIpInfoList.Count} rows to cache");
             }
 
             return azureIpInfoList;

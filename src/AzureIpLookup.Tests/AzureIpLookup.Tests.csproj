@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
-    <PackageReference Include="Moq" Version="4.15.2" />
+    <PackageReference Include="Moq" Version="4.16.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.2" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
@@ -20,6 +20,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AzureIpLookup\AzureIpLookup.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\azureIpInfoList.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

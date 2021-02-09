@@ -1,5 +1,4 @@
-﻿using AzureIpLookup.Legacy.Providers;
-using AzureIpLookup.Providers;
+﻿using AzureIpLookup.Providers;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,10 +11,11 @@ namespace AzureIpLookup
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddLogging();
             builder.Services.AddHttpClient();
+            builder.Services.AddLogging();
+            builder.Services.AddMemoryCache();
+            builder.Services.AddSingleton<IAzureStorageProvider, AzureStorageProvider>();
             builder.Services.AddSingleton<IAzureIpInfoProvider, AzureIpInfoProvider>();
-            builder.Services.AddSingleton<ILegacyAzureIpInfoProvider, LegacyAzureIpInfoProvider>();
         }
     }
 }

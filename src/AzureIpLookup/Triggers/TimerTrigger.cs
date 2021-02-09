@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using AzureIpLookup.Common;
+using AzureIpLookup.Providers;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 
@@ -23,56 +20,44 @@ namespace AzureIpLookup.Triggers
             { "57063", AzureCloudName.AzureUSGovernment },
             { "57064", AzureCloudName.AzureGermanCloud }
         };
+        private readonly IAzureStorageProvider azureStorageProvider;
 
-        public TimerTrigger(ILogger<TimerTrigger> logger)
+        public TimerTrigger(ILogger<TimerTrigger> logger, IAzureStorageProvider azureStorageProvider)
         {
             this.logger = logger;
+            this.azureStorageProvider = azureStorageProvider;
         }
 
         // Triggered every day at midnight - 1am
         [FunctionName("DownloadAzureIpRangeFiles")]
-        public async Task DownloadAzureIpRangeFiles([TimerTrigger("0 0 1 * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task DownloadAzureIpRangeFilesFunction([TimerTrigger("0 0 1 * * *", RunOnStartup = true)] TimerInfo myTimer)
         {
-            await DownloadAzureIpRangeFiles();
+            await DownloadAzureIpRangeFilesAsync();
         }
 
-        private async Task DownloadAzureIpRangeFiles()
+        public async Task DownloadAzureIpRangeFilesAsync()
         {
-            foreach (var downloadId in downloadIdMapping)
+            foreach (var (downloadId, azureCloudName) in downloadIdMapping)
             {
-                logger.LogInformation($"Fetching {downloadId.Value} ip range file download url");
-                string targetUri = $"https://www.microsoft.com/en-us/download/confirmation.aspx?id={downloadId.Key}";
+                string targetUri = $"https://www.microsoft.com/en-us/download/confirmation.aspx?id={downloadId}";
+                logger.LogInformation($"Download ip range file for cloud {azureCloudName} from url {targetUri}");
                 var httpClient = new HttpClient();
                 string responseString = await httpClient.GetStringAsync(targetUri);
-                var matches = fileUriParserRegex.Match(responseString);
+                Match matches = fileUriParserRegex.Match(responseString);
                 if (matches.Success)
                 {
                     string downloadUrl = matches.Value;
-                    logger.LogInformation($"Downloading {downloadId.Value} ip range files from from {downloadUrl}");
-                    using (var responseSteam = await httpClient.GetStreamAsync(downloadUrl))
-                    {
-                        string blobName = $"{downloadId.Value}.json";
-                        await UploadToBlob(blobName, responseSteam, logger);
-                    }
+                    string blobName = $"{azureCloudName}.json";
+                    await azureStorageProvider.UploadToBlobAsync(blobName, downloadUrl);
+                    logger.LogInformation($"Completed upload ip range file for cloud {azureCloudName}");
+                }
+                else
+                {
+                    logger.LogError($"Failed to parse ip range file download url for cloud {azureCloudName}");
                 }
             }
 
             logger.LogInformation("Completed download ip range files for all clouds");
-        }
-
-        private async Task UploadToBlob(string blobName, Stream blobStream, ILogger logger)
-        {
-            string storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-            if (string.IsNullOrEmpty(storageConnectionString))
-            {
-                throw new Exception("Storage connection string can not be null");
-            }
-
-            var container = new BlobContainerClient(storageConnectionString, Constants.StorageContainerName);
-            await container.CreateIfNotExistsAsync(PublicAccessType.Blob);
-            var blob = container.GetBlobClient(blobName);
-            await blob.UploadAsync(blobStream, true);
-            logger.LogInformation($"Successfully uploaded to {blob.Uri}");
         }
     }
 }
