@@ -1,12 +1,10 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using AzureIpLookup.DataContracts;
-using AzureIpLookup.Providers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Newtonsoft.Json;
 
-namespace AzureIpLookup.Tests
+namespace AzureIpLookup.ApiTests
 {
     [TestClass]
     public class ApiClientTests

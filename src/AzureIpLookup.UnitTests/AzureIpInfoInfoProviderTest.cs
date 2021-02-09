@@ -3,13 +3,13 @@ using System.IO;
 using System.Threading.Tasks;
 using AzureIpLookup.DataContracts;
 using AzureIpLookup.Providers;
-using AzureIpLookup.Tests.Common;
+using AzureIpLookup.UnitTests.Common;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
 
-namespace AzureIpLookup.Tests
+namespace AzureIpLookup.UnitTests
 {
     [TestClass]
     public class AzureIpInfoInfoProviderTest

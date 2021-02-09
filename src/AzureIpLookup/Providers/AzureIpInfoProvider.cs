@@ -55,7 +55,7 @@ namespace AzureIpLookup.Providers
             if (!memoryCache.TryGetValue(AzureIpInfoListKey, out IList<AzureIpInfo> azureIpInfoList))
             {
                 azureIpInfoList = await azureStorageProvider.GetAzureIpInfoListAsync();
-                memoryCache.Set(AzureIpInfoListKey, azureIpInfoList, TimeSpan.FromMinutes(60));
+                memoryCache.Set(AzureIpInfoListKey, azureIpInfoList, TimeSpan.FromMinutes(CacheAbsoluteExpirationInMinutes));
                 logger.LogInformation($"Added {azureIpInfoList.Count} rows to cache");
             }
 

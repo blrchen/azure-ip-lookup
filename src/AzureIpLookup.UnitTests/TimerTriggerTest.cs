@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using AzureIpLookup.Providers;
-using AzureIpLookup.Tests.Common;
 using AzureIpLookup.Triggers;
+using AzureIpLookup.UnitTests.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace AzureIpLookup.Tests
+namespace AzureIpLookup.UnitTests
 {
     [TestClass]
     public class TimerTriggerTest

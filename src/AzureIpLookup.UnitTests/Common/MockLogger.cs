@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 
-namespace AzureIpLookup.Tests.Common
+namespace AzureIpLookup.UnitTests.Common
 {
     public class MockLogger<T> : ILogger<T>
     {
