@@ -14,8 +14,9 @@ namespace AzureIpLookup
             builder.Services.AddHttpClient();
             builder.Services.AddLogging();
             builder.Services.AddMemoryCache();
-            builder.Services.AddSingleton<IAzureStorageProvider, AzureStorageProvider>();
             builder.Services.AddSingleton<IAzureIpInfoProvider, AzureIpInfoProvider>();
+            builder.Services.AddSingleton<IAzureStorageProvider, AzureStorageProvider>();
+            builder.Services.AddSingleton<IIpAddressProvider, IpAddressProvider>();
         }
     }
 }

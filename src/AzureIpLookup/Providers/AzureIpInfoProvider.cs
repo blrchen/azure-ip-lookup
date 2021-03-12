@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using AzureIpLookup.Common;
 using AzureIpLookup.DataContracts;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -15,24 +14,28 @@ namespace AzureIpLookup.Providers
         private const string AzureIpInfoListKey = "AzureIpInfoList";
         private const double CacheAbsoluteExpirationInMinutes = 60;
         private readonly IAzureStorageProvider azureStorageProvider;
+        private readonly IIpAddressProvider ipAddressProvider;
         private readonly ILogger<AzureIpInfoProvider> logger;
         private readonly IMemoryCache memoryCache;
 
         public AzureIpInfoProvider(
             IAzureStorageProvider azureStorageProvider,
+            IIpAddressProvider ipAddressProvider,
             ILogger<AzureIpInfoProvider> logger,
             IMemoryCache memoryCache)
         {
             this.azureStorageProvider = azureStorageProvider;
+            this.ipAddressProvider = ipAddressProvider;
             this.logger = logger;
             this.memoryCache = memoryCache;
         }
 
         public async Task<AzureIpInfo> GetAzureIpInfo(string ipOrDomain)
         {
-            string ipAddress = Utils.ConvertToIpAddress(ipOrDomain);
-            var azureIpInfoList = await GetAzureIpInfoList();
+            string ipAddress = ipAddressProvider.ParseIpAddress(ipOrDomain);
+            logger.LogInformation($"{ipOrDomain} is parsed to {ipAddress}");
 
+            var azureIpInfoList = await GetAzureIpInfoList();
             foreach (var ipInfo in azureIpInfoList)
             {
                 var ipNetwork = IPNetwork.Parse(ipInfo.IpAddressPrefix);

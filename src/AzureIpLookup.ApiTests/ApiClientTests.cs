@@ -17,9 +17,9 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupPublicAzureIpByDomain()
+        public async Task TestLookupApi_PublicAzureIpByDomain()
         {
-            string ipAddressOrUrl = "portal-prod-southeastasia-02.southeastasia.cloudapp.azure.com";
+            const string ipAddressOrUrl = "portal-prod-southeastasia-02.southeastasia.cloudapp.azure.com";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual("AzureCloud.southeastasia", ipInfo.ServiceTagId);
             Assert.AreEqual("52.139.236.115", ipInfo.IpAddress);
@@ -29,9 +29,9 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupPublicAzureIpByIpAddress()
+        public async Task TestLookupApi_PublicAzureIpByIpAddress()
         {
-            string ipAddressOrUrl = "52.139.236.115";
+            const string ipAddressOrUrl = "52.139.236.115";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual("AzureCloud.southeastasia", ipInfo.ServiceTagId);
             Assert.AreEqual("52.139.236.115", ipInfo.IpAddress);
@@ -41,9 +41,9 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupAzureChinaCloudIpByDomain()
+        public async Task TestLookupApi_AzureChinaCloudIpByDomain()
         {
-            string ipAddressOrUrl = "portal-mc-chinaeast2-02.chinaeast2.cloudapp.chinacloudapi.cn";
+            const string ipAddressOrUrl = "portal-mc-chinaeast2-02.chinaeast2.cloudapp.chinacloudapi.cn";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual("AzureCloud.chinaeast2", ipInfo.ServiceTagId);
             Assert.AreEqual("40.73.108.25", ipInfo.IpAddress);
@@ -53,7 +53,7 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupAzureChinaCloudIpByIpAddress()
+        public async Task TestLookupApi_AzureChinaCloudIpByIpAddress()
         {
             string ipAddressOrUrl = "40.73.108.25";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
@@ -65,9 +65,9 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupAzureUSGovernmentIpByDomain()
+        public async Task TestLookupApi_AzureUSGovernmentIpByDomain()
         {
-            string ipAddressOrUrl = "portal-ff-usgovtexas-02.usgovtexas.cloudapp.usgovcloudapi.net";
+            const string ipAddressOrUrl = "portal-ff-usgovtexas-02.usgovtexas.cloudapp.usgovcloudapi.net";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual("AzurePortal.USGovTexas", ipInfo.ServiceTagId);
             Assert.AreEqual("20.140.57.97", ipInfo.IpAddress);
@@ -77,7 +77,7 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupAzureUSGovernmentIpByIpAddress()
+        public async Task TestLookupApi_AzureUSGovernmentIpByIpAddress()
         {
             string ipAddressOrUrl = "20.140.57.97";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
@@ -89,15 +89,27 @@ namespace AzureIpLookup.ApiTests
         }
 
         [TestMethod]
-        public async Task TestLookupInvalidIpAddress()
+        public async Task TestLookupApi_InvalidIpAddress()
         {
-            string ipAddressOrUrl = "1.1.1.1";
+            const string ipAddressOrUrl = "1.1.1.1";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual(null, ipInfo.ServiceTagId);
             Assert.AreEqual(null, ipInfo.IpAddress);
             Assert.AreEqual(null, ipInfo.IpAddressPrefix);
             Assert.AreEqual(null, ipInfo.Region);
             Assert.AreEqual(null, ipInfo.SystemService);
+        }
+
+        [TestMethod]
+        public async Task TestLookupApi_IpV6Address()
+        {
+            const string ipAddressOrUrl = "2603:1030:0800:0005:0000:0000:BFEE:A418";
+            var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
+            Assert.AreEqual("AzureMonitor.SouthCentralUS", ipInfo.ServiceTagId);
+            Assert.AreEqual("2603:1030:0800:0005:0000:0000:BFEE:A418", ipInfo.IpAddress);
+            Assert.AreEqual("2603:1030:800:5::bfee:a418/128", ipInfo.IpAddressPrefix);
+            Assert.AreEqual("southcentralus", ipInfo.Region);
+            Assert.AreEqual("AzureMonitor", ipInfo.SystemService);
         }
 
         private async Task<AzureIpInfo> GetAzureIpInfo(string ipAddressOrUrl)

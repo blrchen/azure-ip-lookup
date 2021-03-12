@@ -26,12 +26,12 @@ namespace AzureIpLookup.UnitTests
             var trigger = new TimerTrigger(mockTimerTriggerLogger, mockAzureStorageProvider.Object);
             await trigger.DownloadAzureIpRangeFilesAsync();
 
-            mockAzureStorageProvider.Verify(provider => provider.UploadToBlobAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(4));
+            mockAzureStorageProvider.Verify(_ => _.UploadToBlobAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(4));
         }
 
         private void SetupMock()
         {
-            mockAzureStorageProvider.Setup(provider => provider.UploadToBlobAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            mockAzureStorageProvider.Setup(_ => _.UploadToBlobAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
         }
     }
 }
