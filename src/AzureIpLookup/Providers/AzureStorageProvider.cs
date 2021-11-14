@@ -24,19 +24,17 @@ namespace AzureIpLookup.Providers
             this.logger = logger;
             this.httpClientFactory = httpClientFactory;
             string storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-            this.blobContainerClient = blobContainerClient ?? new BlobContainerClient(storageConnectionString, Constants.StorageContainerName);
+            this.blobContainerClient = new BlobContainerClient(storageConnectionString, Constants.StorageContainerName);
             this.blobContainerClient.CreateIfNotExists(PublicAccessType.Blob);
         }
 
         public async Task UploadToBlobAsync(string blobName, string downloadUrl)
         {
             var httpClient = new HttpClient();
-            await using (var responseSteam = await httpClient.GetStreamAsync(downloadUrl))
-            {
-                var blobClient = blobContainerClient.GetBlobClient(blobName);
-                await blobClient.UploadAsync(responseSteam, true);
-                logger.LogInformation($"Completed upload file to Azure Storage {blobClient.Uri}");
-            }
+            await using var responseSteam = await httpClient.GetStreamAsync(downloadUrl);
+            var blobClient = blobContainerClient.GetBlobClient(blobName);
+            await blobClient.UploadAsync(responseSteam, true);
+            logger.LogInformation($"Completed upload file to Azure Storage {blobClient.Uri}");
         }
 
         public async Task<IList<AzureIpInfo>> GetAzureIpInfoListAsync()
@@ -52,11 +50,6 @@ namespace AzureIpLookup.Providers
 
                 foreach (var azureServiceTag in azureServiceTagsCollection.AzureServiceTags)
                 {
-                    if (string.IsNullOrWhiteSpace(azureServiceTag.Properties.Region))
-                    {
-                        continue;
-                    }
-
                     foreach (string addressPrefix in azureServiceTag.Properties.AddressPrefixes)
                     {
                         azureIpInfoList.Add(new AzureIpInfo
@@ -66,7 +59,8 @@ namespace AzureIpLookup.Providers
 
                             // Platform = azureServiceTag.Properties.Platform, // Platform is always Azure
                             SystemService = azureServiceTag.Properties.SystemService,
-                            IpAddressPrefix = addressPrefix
+                            IpAddressPrefix = addressPrefix,
+                            NetworkFeatures = azureServiceTag.Properties.NetworkFeatures == null ? "" : string.Join(',', azureServiceTag.Properties.NetworkFeatures)
                         });
                     }
                 }

@@ -8,7 +8,7 @@
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
-        "maxTelemetryItemsPerSecond": 10
+        "excludedTypes": "Request"
       }
     }
   }

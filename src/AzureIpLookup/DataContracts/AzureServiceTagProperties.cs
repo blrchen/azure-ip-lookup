@@ -18,5 +18,8 @@ namespace AzureIpLookup.DataContracts
 
         [JsonProperty("addressPrefixes")]
         public string[] AddressPrefixes { get; set; }
+
+        [JsonProperty("networkFeatures")]
+        public string[] NetworkFeatures { get; set; }
     }
 }

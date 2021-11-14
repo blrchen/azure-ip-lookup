@@ -55,7 +55,7 @@ namespace AzureIpLookup.ApiTests
         [TestMethod]
         public async Task TestLookupApi_AzureChinaCloudIpByIpAddress()
         {
-            string ipAddressOrUrl = "40.73.108.25";
+            const string ipAddressOrUrl = "40.73.108.25";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual("AzureCloud.chinaeast2", ipInfo.ServiceTagId);
             Assert.AreEqual("40.73.108.25", ipInfo.IpAddress);
@@ -79,7 +79,7 @@ namespace AzureIpLookup.ApiTests
         [TestMethod]
         public async Task TestLookupApi_AzureUSGovernmentIpByIpAddress()
         {
-            string ipAddressOrUrl = "20.140.57.97";
+            const string ipAddressOrUrl = "20.140.57.97";
             var ipInfo = await GetAzureIpInfo(ipAddressOrUrl);
             Assert.AreEqual("AzurePortal.USGovTexas", ipInfo.ServiceTagId);
             Assert.AreEqual("20.140.57.97", ipInfo.IpAddress);

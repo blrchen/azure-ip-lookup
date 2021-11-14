@@ -1,8 +1,6 @@
-using System.Threading.Tasks;
 using AzureIpLookup.Providers;
 using AzureIpLookup.UnitTests.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace AzureIpLookup.UnitTests
 {

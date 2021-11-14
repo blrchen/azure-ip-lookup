@@ -28,7 +28,7 @@ namespace AzureIpLookup.Providers
                             logger.LogInformation($"{ipOrDomain} is a valid ip address");
                             return ipOrDomain;
                         default:
-                            // Not a valid ip address, do nothing
+                            logger.LogInformation($"{ipOrDomain} is can not be resolved to a valid ip address");
                             break;
                     }
                 }
@@ -41,14 +41,14 @@ namespace AzureIpLookup.Providers
 
                 var tmpUri = new Uri(ipOrDomain);
                 ipOrDomain = tmpUri.Host;
-                IPAddress[] ipAddresses = Dns.GetHostAddresses(ipOrDomain);
+                var ipAddresses = Dns.GetHostAddresses(ipOrDomain);
                 var ipAddress = ipAddresses[0];
                 logger.LogInformation($"{ipOrDomain} is a valid hostname");
                 return ipAddress.ToString();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError("Error parsing parse ipOrDomain, error =", e);
+                logger.LogError($"Error parsing parse ipOrDomain, error = {ex}");
                 return "";
             }
         }

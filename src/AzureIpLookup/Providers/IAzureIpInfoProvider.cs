@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AzureIpLookup.DataContracts;
 
 namespace AzureIpLookup.Providers
 {
     public interface IAzureIpInfoProvider
     {
-        Task<AzureIpInfo> GetAzureIpInfo(string ipOrDomain);
+        Task<IList<AzureIpInfo>> GetAzureIpInfo(string ipOrDomain);
     }
 }

@@ -18,5 +18,8 @@ namespace AzureIpLookup.DataContracts
         // public string Platform { get; set; }
         [JsonProperty("systemService")]
         public string SystemService { get; set; }
+
+        [JsonProperty("networkFeatures")]
+        public string NetworkFeatures { get; set; }
     }
 }

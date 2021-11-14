@@ -13,7 +13,7 @@ namespace AzureIpLookup.Triggers
     {
         private readonly ILogger<TimerTrigger> logger;
         private readonly Regex fileUriParserRegex = new Regex(@"(https:\/\/download.microsoft.com\/download\/.*?\/ServiceTags_[A-z]+_[0-9]+\.json)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private readonly Dictionary<string, AzureCloudName> downloadIdMapping = new Dictionary<string, AzureCloudName>()
+        private readonly Dictionary<string, AzureCloudName> downloadIdMapping = new Dictionary<string, AzureCloudName>
         {
             { "56519", AzureCloudName.AzureCloud },
             { "57062", AzureCloudName.AzureChinaCloud },
@@ -30,7 +30,7 @@ namespace AzureIpLookup.Triggers
 
         // Triggered every day at midnight - 1am
         [FunctionName("DownloadAzureIpRangeFiles")]
-        public async Task DownloadAzureIpRangeFilesFunction([TimerTrigger("0 0 1 * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task DownloadAzureIpRangeFiles([TimerTrigger("0 0 1 * * *", RunOnStartup = true)] TimerInfo myTimer)
         {
             await DownloadAzureIpRangeFilesAsync();
         }
@@ -43,7 +43,7 @@ namespace AzureIpLookup.Triggers
                 logger.LogInformation($"Download ip range file for cloud {azureCloudName} from url {targetUri}");
                 var httpClient = new HttpClient();
                 string responseString = await httpClient.GetStringAsync(targetUri);
-                Match matches = fileUriParserRegex.Match(responseString);
+                var matches = fileUriParserRegex.Match(responseString);
                 if (matches.Success)
                 {
                     string downloadUrl = matches.Value;
