@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AzureIpLookup.Common;
@@ -28,11 +29,26 @@ namespace AzureIpLookup.Triggers
             this.azureStorageProvider = azureStorageProvider;
         }
 
-        // Triggered every day at midnight - 1am
+        // Triggered every day at UTC 1AM
         [FunctionName("DownloadAzureIpRangeFiles")]
         public async Task DownloadAzureIpRangeFiles([TimerTrigger("0 0 1 * * *", RunOnStartup = true)] TimerInfo myTimer)
         {
             await DownloadAzureIpRangeFilesAsync();
+        }
+
+        // Triggered every day at UTC 1AM
+        [FunctionName("IngestServiceTagsCsv")]
+        public async Task IngestServiceTagsCsv([TimerTrigger("1 0 0 * * *", RunOnStartup = true)] TimerInfo myTimer)
+        {
+            var list = await azureStorageProvider.GetAzureIpInfoListAsync();
+            var sb = new StringBuilder();
+            sb.AppendLine("ServiceTagId,IpAddress,IpAddressPrefix,Region,SystemService,NetworkFeatures");
+            foreach (var i in list)
+            {
+                sb.AppendLine($"{i.ServiceTagId},{i.IpAddress}, {i.IpAddressPrefix}, {i.Region}, {i.SystemService}, {i.NetworkFeatures}");
+            }
+
+            await azureStorageProvider.UploadBlobAsync("ServiceTags.csv", sb.ToString());
         }
 
         public async Task DownloadAzureIpRangeFilesAsync()
@@ -48,7 +64,7 @@ namespace AzureIpLookup.Triggers
                 {
                     string downloadUrl = matches.Value;
                     string blobName = $"{azureCloudName}.json";
-                    await azureStorageProvider.UploadToBlobAsync(blobName, downloadUrl);
+                    await azureStorageProvider.UploadBlobFromUrlAsync(blobName, downloadUrl);
                     logger.LogInformation($"Completed upload ip range file for cloud {azureCloudName}");
                 }
                 else

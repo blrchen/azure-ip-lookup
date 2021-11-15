@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -28,13 +30,22 @@ namespace AzureIpLookup.Providers
             this.blobContainerClient.CreateIfNotExists(PublicAccessType.Blob);
         }
 
-        public async Task UploadToBlobAsync(string blobName, string downloadUrl)
+        public async Task UploadBlobAsync(string blobName, string content)
+        {
+            var blobClient = blobContainerClient.GetBlobClient(blobName);
+            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(content ?? ""));
+            await blobClient.UploadAsync(ms, true);
+
+            logger.LogInformation($"Completed upload file {blobName} to Azure Storage {blobClient.Uri}");
+        }
+
+        public async Task UploadBlobFromUrlAsync(string blobName, string url)
         {
             var httpClient = new HttpClient();
-            await using var responseSteam = await httpClient.GetStreamAsync(downloadUrl);
+            await using var responseSteam = await httpClient.GetStreamAsync(url);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
             await blobClient.UploadAsync(responseSteam, true);
-            logger.LogInformation($"Completed upload file to Azure Storage {blobClient.Uri}");
+            logger.LogInformation($"Completed upload file {blobName} to Azure Storage {blobClient.Uri}");
         }
 
         public async Task<IList<AzureIpInfo>> GetAzureIpInfoListAsync()
@@ -60,7 +71,7 @@ namespace AzureIpLookup.Providers
                             // Platform = azureServiceTag.Properties.Platform, // Platform is always Azure
                             SystemService = azureServiceTag.Properties.SystemService,
                             IpAddressPrefix = addressPrefix,
-                            NetworkFeatures = azureServiceTag.Properties.NetworkFeatures == null ? "" : string.Join(',', azureServiceTag.Properties.NetworkFeatures)
+                            NetworkFeatures = azureServiceTag.Properties.NetworkFeatures == null ? "" : string.Join(' ', azureServiceTag.Properties.NetworkFeatures)
                         });
                     }
                 }
