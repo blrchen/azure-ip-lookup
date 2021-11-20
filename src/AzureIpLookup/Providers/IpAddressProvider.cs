@@ -14,26 +14,27 @@ namespace AzureIpLookup.Providers
             this.logger = logger;
         }
 
-        public string ParseIpAddress(string ipOrDomain)
+        public bool TryParseIpAddress(string ipOrDomain, out string result)
         {
             try
             {
-                // 1. Parse as ip address (ip v4 or v6)
+                // 1. If input is an ip v4 or v6 address, skip parse
                 if (IPAddress.TryParse(ipOrDomain, out var address))
                 {
                     switch (address.AddressFamily)
                     {
                         case AddressFamily.InterNetwork:
                         case AddressFamily.InterNetworkV6:
-                            logger.LogInformation($"{ipOrDomain} is a valid ip address");
-                            return ipOrDomain;
+                            result = ipOrDomain;
+                            logger.LogInformation($"{ipOrDomain} is a valid ip address, parse is skipped");
+                            return true;
                         default:
-                            logger.LogInformation($"{ipOrDomain} is can not be resolved to a valid ip address");
+                            // Not a valid ip address, do nothing
                             break;
                     }
                 }
 
-                // 2. Parse as hostname
+                // 2. Convert to url and parse
                 if (!(ipOrDomain.StartsWith("http://") || ipOrDomain.StartsWith("https://")))
                 {
                     ipOrDomain = "http://" + ipOrDomain;
@@ -43,13 +44,14 @@ namespace AzureIpLookup.Providers
                 ipOrDomain = tmpUri.Host;
                 var ipAddresses = Dns.GetHostAddresses(ipOrDomain);
                 var ipAddress = ipAddresses[0];
-                logger.LogInformation($"{ipOrDomain} is a valid hostname");
-                return ipAddress.ToString();
+                result = ipAddress.ToString();
+                return true;
             }
             catch (Exception ex)
             {
-                logger.LogError($"Error parsing parse ipOrDomain, error = {ex}");
-                return "";
+                logger.LogError($"Error parsing ipOrDomain, error = {ex}");
+                result = string.Empty;
+                return false;
             }
         }
     }

@@ -33,7 +33,7 @@ namespace AzureIpLookup.Providers
         public async Task UploadBlobAsync(string blobName, string content)
         {
             var blobClient = blobContainerClient.GetBlobClient(blobName);
-            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(content ?? ""));
+            await using var ms = new MemoryStream(Encoding.UTF8.GetBytes(content ?? ""));
             await blobClient.UploadAsync(ms, true);
 
             logger.LogInformation($"Completed upload file {blobName} to Azure Storage {blobClient.Uri}");

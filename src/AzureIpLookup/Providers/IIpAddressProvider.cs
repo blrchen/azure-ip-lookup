@@ -2,6 +2,6 @@
 {
     public interface IIpAddressProvider
     {
-        string ParseIpAddress(string ipOrDomain);
+        bool TryParseIpAddress(string ipOrDomain, out string result);
     }
 }

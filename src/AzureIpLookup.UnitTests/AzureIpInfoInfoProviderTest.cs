@@ -14,10 +14,10 @@ namespace AzureIpLookup.UnitTests
     [TestClass]
     public class AzureIpInfoInfoProviderTest
     {
-        private const string IpAddress = "104.45.231.79";
         private readonly Mock<IAzureStorageProvider> mockAzureStorageProvider;
         private readonly Mock<IIpAddressProvider> mockIpAddressProvider;
         private readonly IAzureIpInfoProvider azureIpInfoProvider;
+        private string ipAddress = "104.45.231.79";
 
         public AzureIpInfoInfoProviderTest()
         {
@@ -32,15 +32,15 @@ namespace AzureIpLookup.UnitTests
         [TestMethod]
         public async Task TestGetAzureIpInfo()
         {
-            await azureIpInfoProvider.GetAzureIpInfo(IpAddress);
+            await azureIpInfoProvider.GetAzureIpInfo(ipAddress);
             mockAzureStorageProvider.Verify(_ => _.GetAzureIpInfoListAsync(), Times.Once);
         }
 
         [TestMethod]
         public async Task TestGetAzureIpInfo_ReadFromCacheIfNoExpired()
         {
-            await azureIpInfoProvider.GetAzureIpInfo(IpAddress);
-            await azureIpInfoProvider.GetAzureIpInfo(IpAddress);
+            await azureIpInfoProvider.GetAzureIpInfo(ipAddress);
+            await azureIpInfoProvider.GetAzureIpInfo(ipAddress);
             mockAzureStorageProvider.Verify(_ => _.GetAzureIpInfoListAsync(), Times.Once);
         }
 
@@ -49,7 +49,7 @@ namespace AzureIpLookup.UnitTests
             var azureIpInfoListFileContent = File.ReadAllText(@"Data\azureIpInfoList.json");
             var azureIpInfoList = JsonConvert.DeserializeObject<IList<AzureIpInfo>>(azureIpInfoListFileContent);
             mockAzureStorageProvider.Setup(_ => _.GetAzureIpInfoListAsync()).ReturnsAsync(azureIpInfoList);
-            mockIpAddressProvider.Setup(_ => _.ParseIpAddress(It.IsAny<string>())).Returns(IpAddress);
+            mockIpAddressProvider.Setup(_ => _.TryParseIpAddress(It.IsAny<string>(), out ipAddress)).Returns(true);
         }
     }
 }

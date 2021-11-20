@@ -32,8 +32,11 @@ namespace AzureIpLookup.Providers
 
         public async Task<IList<AzureIpInfo>> GetAzureIpInfo(string ipOrDomain)
         {
-            string ipAddress = ipAddressProvider.ParseIpAddress(ipOrDomain);
-            logger.LogInformation($"{ipOrDomain} is parsed to {ipAddress}");
+            if (!ipAddressProvider.TryParseIpAddress(ipOrDomain, out string ipAddress))
+            {
+                logger.LogInformation($"Can not parse {ipOrDomain} to a valid ip address");
+                return null;
+            }
 
             var result = new List<AzureIpInfo>();
             var azureIpInfoList = await GetAzureIpInfoList();
@@ -49,7 +52,10 @@ namespace AzureIpLookup.Providers
                 }
             }
 
-            logger.LogInformation($"{ipAddress} is not a known Azure ip address");
+            if (result.Count == 0)
+            {
+                logger.LogInformation($"{ipAddress} is not a known Azure ip address");
+            }
 
             return result;
         }
@@ -60,7 +66,7 @@ namespace AzureIpLookup.Providers
             {
                 azureIpInfoList = await azureStorageProvider.GetAzureIpInfoListAsync();
                 memoryCache.Set(AzureIpInfoListKey, azureIpInfoList, TimeSpan.FromMinutes(CacheAbsoluteExpirationInMinutes));
-                logger.LogInformation($"Added {azureIpInfoList.Count} rows to cache with expiration {CacheAbsoluteExpirationInMinutes} minutes");
+                logger.LogInformation($"{azureIpInfoList.Count} rows are added to cache with expiration {CacheAbsoluteExpirationInMinutes} minutes");
             }
 
             return azureIpInfoList;

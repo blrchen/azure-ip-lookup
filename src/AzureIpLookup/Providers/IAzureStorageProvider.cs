@@ -7,7 +7,7 @@ namespace AzureIpLookup.Providers
     public interface IAzureStorageProvider
     {
         Task UploadBlobAsync(string blobName, string content);
-        Task UploadBlobFromUrlAsync(string blobName, string downloadUrl);
+        Task UploadBlobFromUrlAsync(string blobName, string url);
         Task<IList<AzureIpInfo>> GetAzureIpInfoListAsync();
     }
 }
