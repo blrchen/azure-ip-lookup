@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using AzureIpLookup.Providers;
+using Azure.Ip;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -11,30 +11,27 @@ namespace AzureIpLookup.Triggers
 {
     public class HttpTrigger
     {
-        private readonly IAzureIpInfoProvider azureIpInfoProvider;
+        private readonly IAzureIpProvider azureIpProvider;
         private readonly ILogger<HttpTrigger> logger;
 
         public HttpTrigger(
-            IAzureIpInfoProvider azureIpInfoProvider,
+            IAzureIpProvider azureIpProvider,
             ILogger<HttpTrigger> logger)
         {
-            this.azureIpInfoProvider = azureIpInfoProvider;
+            this.azureIpProvider = azureIpProvider;
             this.logger = logger;
         }
 
         [FunctionName("GetAzureIpInfo")]
-        public async Task<IActionResult> GetAzureIpInfo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ipinfo")] HttpRequest req)
+        public async Task<IActionResult> GetAzureIpInfo([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ipinfo")] HttpRequest req)
         {
-            logger.LogInformation("Function GetAzureIpInfo starts");
-
             string ipOrDomain = req.Query["ipOrDomain"];
             if (string.IsNullOrEmpty(ipOrDomain))
             {
                 return new BadRequestObjectResult("ipOrDomain can not be null");
             }
 
-            var result = await azureIpInfoProvider.GetAzureIpInfo(ipOrDomain);
+            var result = await azureIpProvider.GetAzureIpInfo(ipOrDomain);
 
             logger.LogInformation("Function GetAzureIpInfo completed successfully");
 

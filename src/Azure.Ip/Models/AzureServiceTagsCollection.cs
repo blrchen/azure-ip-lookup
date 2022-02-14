@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace AzureIpLookup.DataContracts
+namespace Azure.Ip.Models
 {
     public class AzureServiceTagsCollection
     {

@@ -1,5 +1,6 @@
+using System.Net.Http;
 using System.Threading.Tasks;
-using AzureIpLookup.Providers;
+using Azure.Blob;
 using AzureIpLookup.Triggers;
 using AzureIpLookup.UnitTests.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,27 +12,29 @@ namespace AzureIpLookup.UnitTests
     public class TimerTriggerTest
     {
         private readonly MockLogger<TimerTrigger> mockTimerTriggerLogger;
-        private readonly Mock<IAzureStorageProvider> mockAzureStorageProvider;
+        private readonly Mock<IHttpClientFactory> mockHttpClientFactory;
+        private readonly Mock<IAzureBlobProvider> mockAzureStorageProvider;
 
         public TimerTriggerTest()
         {
             mockTimerTriggerLogger = new MockLogger<TimerTrigger>();
-            mockAzureStorageProvider = new Mock<IAzureStorageProvider>(MockBehavior.Strict);
+            mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
+            mockAzureStorageProvider = new Mock<IAzureBlobProvider>(MockBehavior.Strict);
             SetupMock();
         }
 
         [TestMethod]
-        public async Task TestDownloadAzureIpRangeFilesAsync()
+        public async Task TestSyncServiceTagFilesAsync()
         {
-            var trigger = new TimerTrigger(mockTimerTriggerLogger, mockAzureStorageProvider.Object);
-            await trigger.DownloadAzureIpRangeFilesAsync();
-
-            mockAzureStorageProvider.Verify(_ => _.UploadBlobFromUrlAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(4));
+            var trigger = new TimerTrigger(mockTimerTriggerLogger, mockHttpClientFactory.Object, mockAzureStorageProvider.Object);
+            await trigger.SyncServiceTagFilesAsync();
+            mockAzureStorageProvider.Verify(_ => _.UploadToBlobFromUrlAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(4));
         }
 
         private void SetupMock()
         {
-            mockAzureStorageProvider.Setup(_ => _.UploadBlobFromUrlAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            mockHttpClientFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
+            mockAzureStorageProvider.Setup(_ => _.UploadToBlobFromUrlAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
         }
     }
 }

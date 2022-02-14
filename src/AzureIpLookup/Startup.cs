@@ -1,4 +1,7 @@
-﻿using AzureIpLookup.Providers;
+﻿using System;
+using Azure.Blob;
+using Azure.Ip;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,9 +17,13 @@ namespace AzureIpLookup
             builder.Services.AddHttpClient();
             builder.Services.AddLogging();
             builder.Services.AddMemoryCache();
-            builder.Services.AddSingleton<IAzureIpInfoProvider, AzureIpInfoProvider>();
-            builder.Services.AddSingleton<IAzureStorageProvider, AzureStorageProvider>();
-            builder.Services.AddSingleton<IIpAddressProvider, IpAddressProvider>();
+            builder.Services.AddSingleton(_ =>
+            {
+                string storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+                return new BlobContainerClient(storageConnectionString, "ipfiles");
+            });
+            builder.Services.AddSingleton<IAzureIpProvider, AzureIpProvider>();
+            builder.Services.AddSingleton<IAzureBlobProvider, AzureBlobProvider>();
         }
     }
 }
