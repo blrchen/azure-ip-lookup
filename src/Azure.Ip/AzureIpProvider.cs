@@ -62,6 +62,12 @@ namespace Azure.Ip
 
         public bool TryParseIpAddress(string ipOrDomain, out string result)
         {
+            if (string.IsNullOrEmpty(ipOrDomain))
+            {
+                result = string.Empty;
+                return false;
+            }
+
             try
             {
                 // 1. If input is an ip v4 or v6 address, skip parse
@@ -81,7 +87,8 @@ namespace Azure.Ip
                 }
 
                 // 2. Convert to url and parse
-                if (!(ipOrDomain.StartsWith("http://") || ipOrDomain.StartsWith("https://")))
+                if (!(ipOrDomain.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                      ipOrDomain.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
                 {
                     ipOrDomain = "http://" + ipOrDomain;
                 }
@@ -121,8 +128,9 @@ namespace Azure.Ip
             {
                 string ipFileBlobUrl = $"https://azureiplookup.blob.core.windows.net/ipfiles/{cloud}.json";
                 logger.LogInformation($"Getting {cloud} service tags from {ipFileBlobUrl}");
-                string jsonResponseMessage = await httpClientFactory.CreateClient().GetStringAsync(ipFileBlobUrl);
-                var azureServiceTagsCollection = JsonConvert.DeserializeObject<AzureServiceTagsCollection>(jsonResponseMessage);
+                using var httpclient = httpClientFactory.CreateClient();
+                string jsonResponseMessage = await httpclient.GetStringAsync(new Uri(ipFileBlobUrl));
+                var azureServiceTagsCollection = JsonConvert.DeserializeObject<AzureServiceTagsRoot>(jsonResponseMessage);
 
                 foreach (var azureServiceTag in azureServiceTagsCollection.AzureServiceTags)
                 {

@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Azure.Blob;
@@ -28,13 +29,13 @@ namespace AzureIpLookup.UnitTests
         {
             var trigger = new TimerTrigger(mockTimerTriggerLogger, mockHttpClientFactory.Object, mockAzureStorageProvider.Object);
             await trigger.SyncServiceTagFilesAsync();
-            mockAzureStorageProvider.Verify(_ => _.UploadToBlobFromUrlAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(4));
+            mockAzureStorageProvider.Verify(_ => _.UploadToBlobFromUriAsync(It.IsAny<string>(), It.IsAny<Uri>()), Times.Exactly(4));
         }
 
         private void SetupMock()
         {
             mockHttpClientFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
-            mockAzureStorageProvider.Setup(_ => _.UploadToBlobFromUrlAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            mockAzureStorageProvider.Setup(_ => _.UploadToBlobFromUriAsync(It.IsAny<string>(), It.IsAny<Uri>())).Returns(Task.CompletedTask);
         }
     }
 }

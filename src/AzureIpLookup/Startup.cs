@@ -20,7 +20,8 @@ namespace AzureIpLookup
             builder.Services.AddSingleton(_ =>
             {
                 string storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-                return new BlobContainerClient(storageConnectionString, "ipfiles");
+                const string blobContainerName = "ipfiles";
+                return new BlobContainerClient(storageConnectionString, blobContainerName);
             });
             builder.Services.AddSingleton<IAzureIpProvider, AzureIpProvider>();
             builder.Services.AddSingleton<IAzureBlobProvider, AzureBlobProvider>();

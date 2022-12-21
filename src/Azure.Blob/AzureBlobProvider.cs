@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,10 +32,10 @@ namespace Azure.Blob
             logger.LogInformation($"Successfully uploaded to {blobClient.Uri}");
         }
 
-        public async Task UploadToBlobFromUrlAsync(string blobName, string url)
+        public async Task UploadToBlobFromUriAsync(string blobName, Uri uri)
         {
-            var httpClient = new HttpClient();
-            await using var responseSteam = await httpClient.GetStreamAsync(url);
+            using var httpClient = new HttpClient();
+            await using var responseSteam = await httpClient.GetStreamAsync(uri);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
             await blobClient.UploadAsync(responseSteam, true);
             logger.LogInformation($"Completed upload file {blobName} to Azure Storage {blobClient.Uri}");
