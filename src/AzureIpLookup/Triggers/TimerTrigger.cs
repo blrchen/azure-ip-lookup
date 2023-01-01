@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -44,16 +45,16 @@ namespace AzureIpLookup.Triggers
         {
             foreach (var (downloadId, azureCloudName) in downloadIdMapping)
             {
-                string targetUri = $"https://www.microsoft.com/en-us/download/confirmation.aspx?id={downloadId}";
-                logger.LogInformation($"Fetch service tag file download url for cloud {azureCloudName} from {targetUri}");
-                var httpClient = httpClientFactory.CreateClient();
-                string responseString = await httpClient.GetStringAsync(targetUri);
+                string originalDownloadUrl = $"https://www.microsoft.com/en-us/download/confirmation.aspx?id={downloadId}";
+                logger.LogInformation($"Fetch service tag file download url for cloud {azureCloudName} from {originalDownloadUrl}");
+                using var httpClient = httpClientFactory.CreateClient();
+                string responseString = await httpClient.GetStringAsync(new Uri(originalDownloadUrl));
                 var matches = fileUriParserRegex.Match(responseString);
                 if (matches.Success)
                 {
                     string downloadUrl = matches.Value;
                     string blobName = $"{azureCloudName}.json";
-                    await azureBlobProvider.UploadToBlobFromUrlAsync(blobName, downloadUrl);
+                    await azureBlobProvider.UploadToBlobFromUriAsync(blobName, new Uri(downloadUrl));
                     logger.LogInformation($"Completed upload service tag file for cloud {azureCloudName}");
                 }
                 else

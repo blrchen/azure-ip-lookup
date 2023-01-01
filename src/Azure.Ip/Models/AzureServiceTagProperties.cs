@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace Azure.Ip.Models
 {
@@ -17,9 +18,9 @@ namespace Azure.Ip.Models
         public string SystemService { get; set; }
 
         [JsonProperty("addressPrefixes")]
-        public string[] AddressPrefixes { get; set; }
+        public ReadOnlyCollection<string> AddressPrefixes { get; set; }
 
         [JsonProperty("networkFeatures")]
-        public string[] NetworkFeatures { get; set; }
+        public ReadOnlyCollection<string> NetworkFeatures { get; set; }
     }
 }

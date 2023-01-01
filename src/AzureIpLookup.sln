@@ -5,23 +5,18 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureIpLookup", "AzureIpLookup\AzureIpLookup.csproj", "{F79A6BA5-2191-429E-94AB-EF0B1B9C87AC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".CodeAnalytics", ".CodeAnalytics", "{1A408491-37B9-4D5A-9F8E-E5EBC51AC5D4}"
-	ProjectSection(SolutionItems) = preProject
-		CodeAnalysis.ruleset = CodeAnalysis.ruleset
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Documentation", ".Documentation", "{4EF6C6DD-19D9-40B4-B8D5-BE35616202C2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Files", ".Files", "{1A408491-37B9-4D5A-9F8E-E5EBC51AC5D4}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureIpLookup.UnitTests", "AzureIpLookup.UnitTests\AzureIpLookup.UnitTests.csproj", "{FBA66280-6B7A-4026-B43E-DBE65C7EF80F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure.Ip", "Azure.Ip\Azure.Ip.csproj", "{B72F1075-612A-460E-B3F1-30C2246009DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.Ip", "Azure.Ip\Azure.Ip.csproj", "{B72F1075-612A-460E-B3F1-30C2246009DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure.Blob", "Azure.Blob\Azure.Blob.csproj", "{94D9C83C-8282-4CCE-9E25-4516450E81E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.Blob", "Azure.Blob\Azure.Blob.csproj", "{94D9C83C-8282-4CCE-9E25-4516450E81E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure.Common", "Azure.Common\Azure.Common.csproj", "{1BED9C18-9C06-4EC3-84D6-6C67D4F696FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.Common", "Azure.Common\Azure.Common.csproj", "{1BED9C18-9C06-4EC3-84D6-6C67D4F696FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

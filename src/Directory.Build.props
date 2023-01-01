@@ -1,16 +1,10 @@
 <Project>
   <!-- $(MSBuildThisFileDirectory) already includes the trailing slash -->
   <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>1591</NoWarn>
+    <AnalysisLevel>latest-All</AnalysisLevel>
+    <TreatWarningsAsErrors Condition="'$(BuildingInsideVisualStudio)'!='true'">true</TreatWarningsAsErrors>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 </Project>
