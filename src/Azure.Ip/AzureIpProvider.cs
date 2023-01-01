@@ -140,6 +140,7 @@ namespace Azure.Ip
                         {
                             ServiceTagId = azureServiceTag.Id,
                             Region = azureServiceTag.Properties.Region,
+                            RegionId = azureServiceTag.Properties.RegionId,
 
                             // Platform = azureServiceTag.Properties.Platform, // Platform is always Azure
                             SystemService = azureServiceTag.Properties.SystemService,
