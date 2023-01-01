@@ -11,6 +11,9 @@ namespace Azure.Ip.Models
         [JsonProperty("region")]
         public string Region { get; set; }
 
+        [JsonProperty("regionId")]
+        public string RegionId { get; set; }
+
         [JsonProperty("platform")]
         public string Platform { get; set; }
 

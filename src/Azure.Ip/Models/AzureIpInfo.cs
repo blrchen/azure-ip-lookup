@@ -14,6 +14,8 @@ namespace Azure.Ip.Models
         public string IpAddressPrefix { get; set; }
         [JsonProperty("region")]
         public string Region { get; set; }
+        [JsonProperty("regionId")]
+        public string RegionId { get; set; }
 
         // public string Platform { get; set; }
         [JsonProperty("systemService")]
