@@ -18,16 +18,14 @@ Web APIs to lookup Azure region info and service tag based on domain name or ip 
 
 ## Local development env setup steps
 
-1. Install dotnet core sdk 6
-2. Run Azurite Emulator locally with following docker command. 
+1. Install dotnet core sdk 6 from <https://dotnet.microsoft.com/download/dotnet/6.0>
+2. Open **AzureIpLookup.sln** in Visual Studio 2022 or Rider
+3. Compile the code and start function app locally. You should be able to access local endpoint <http://localhost:7071/api/ipinfo?ipOrDomain=40.78.234.177> if everything runs correctly. If you see error `The listener for function 'SyncServiceTagFilesAsync' was unable to start.`, try run Azurite Emulator locally with following docker command and then restart the function app
 
     ```bash
     docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
         mcr.microsoft.com/azure-storage/azurite
     ```
-
-3. Open **AzureIpLookup.sln** in Visual Studio 2022 or Rider
-4. Compile the code and run locally, you should be able to access local endpoint <http://localhost:7071/api/ipinfo?ipOrDomain=40.78.234.177> if everything runs correctly
 
 ## Cloud deployment
 
