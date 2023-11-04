@@ -1,4 +1,4 @@
-﻿namespace Azure.Common
+﻿namespace AzureIpLookup
 {
     public enum AzureCloudName
     {
